@@ -1,0 +1,15 @@
+<h1 >{{a.b.c}}</h1>
+<div ng-class="{waiting: !!waiting}" class="game-wrapper {{playerSide}}-player"  ui-event='{"mousewheel":"onMouseWheel($event)","touchstart":"onTouchStart($event)","touchmove":"onTouchMove($event)","touchend":"onTouchStop($event)"}'>
+    <div class="map" style="height:{{mapHeight}}px;width:{{mapWidth}}px;">
+        <div class="goal-container">
+            <div class="goal"></div>
+            <div class="goal-keeper" style="top:{{goalKeeperY}}px;height:{{goalKeeperHeight}}px;"></div>
+        </div>
+    </div>
+    <div id="ball" style="{{ballPosition}}">
+        <div class="ball-wrapper">
+            <div class="ball"></div>
+            <div class="ball-shadow"></div>
+        </div>
+    </div>
+</div>
