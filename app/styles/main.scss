@@ -8,12 +8,32 @@ $bgColor : #fff;
 $borderWidth : 10px;
 $borderColor : rgba(0,0,0,.85);
 $minDimension : 200px;
+$mapBackground : url(http://www.luminvision.co.uk/images/hockey.jpg) no-repeat;
 
 
 
 .game-wrapper{
 	background: $bgColor;
 	position: relative;
+
+	&.game-active{
+		.map, #ball {
+			display : block;
+		}
+
+		#waiting{		
+			display: none;
+		}
+	}
+	
+	#waiting{
+		padding : 100px;
+		text-align: center;
+	}
+
+	.map, #ball {
+		display : none;
+	}
 
 	.map{
 		border : $borderWidth solid $borderColor;
@@ -24,7 +44,8 @@ $minDimension : 200px;
 		min-height : $minDimension;
 		min-width : $minDimension;
 		position: relative;
-		background : url(http://loadpaper.com/large/Hockey_wallpapers_158.jpg);
+		background : $mapBackground;
+		background-size : 200% 100%;
 
 		.goal-container{
 			position : absolute;
@@ -46,6 +67,7 @@ $minDimension : 200px;
 
 .left-player{
 	.map{
+		background-position : left;
 		border-top-right-radius : 0;
 		border-bottom-right-radius: 0;
 		.goal-container{
@@ -55,6 +77,7 @@ $minDimension : 200px;
 }
 .right-player{
 	.map{
+		background-position : right;
 		border-top-left-radius : 0;
 		border-bottom-left-radius: 0;
 		.goal-container{
