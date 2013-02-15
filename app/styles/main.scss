@@ -16,6 +16,16 @@ $mapBackground : url(http://www.luminvision.co.uk/images/hockey.jpg) no-repeat;
 	background: $bgColor;
 	position: relative;
 
+	&.game-over{
+		#game-over{		
+			display: block;
+		}		
+		
+		.map, #ball {
+			display : none!important;
+		}		
+	}
+
 	&.game-active{
 		.map, #ball {
 			display : block;
@@ -26,6 +36,10 @@ $mapBackground : url(http://www.luminvision.co.uk/images/hockey.jpg) no-repeat;
 		}
 	}
 	
+	#game-over{		
+		display: none;
+	}
+
 	#waiting{
 		padding : 100px;
 		text-align: center;
@@ -36,6 +50,7 @@ $mapBackground : url(http://www.luminvision.co.uk/images/hockey.jpg) no-repeat;
 	}
 
 	.map{
+		position : relative;
 		border : $borderWidth solid $borderColor;
 		border-left : 0;
 		border-right : 0;
@@ -67,6 +82,7 @@ $mapBackground : url(http://www.luminvision.co.uk/images/hockey.jpg) no-repeat;
 
 .left-player{
 	.map{
+		float : right;
 		background-position : left;
 		border-top-right-radius : 0;
 		border-bottom-right-radius: 0;
@@ -77,6 +93,7 @@ $mapBackground : url(http://www.luminvision.co.uk/images/hockey.jpg) no-repeat;
 }
 .right-player{
 	.map{
+		float : left;
 		background-position : right;
 		border-top-left-radius : 0;
 		border-bottom-left-radius: 0;

@@ -3,7 +3,7 @@
 angularGameApp.controller('GameCtrl', function($scope, $rootScope, $routeParams, $q, $timeout, socket) {
 	// number of pixels that the "goalkeeper" can move at a time
 
-
+	//window.X = 1;
 	var pace = 15,
 		touch  = {
 			first : {
@@ -66,6 +66,7 @@ angularGameApp.controller('GameCtrl', function($scope, $rootScope, $routeParams,
 	$scope.name = $routeParams.name || 'unnamed';
 	$scope.waiting = true;
 	$scope.playerSide = 'left';
+	$scope.gameOver =  false;
 
 	$scope.mapHeight = 400;
 	$scope.mapWidth = 600;
@@ -77,7 +78,7 @@ angularGameApp.controller('GameCtrl', function($scope, $rootScope, $routeParams,
 	$scope.onTouchMove = touch.move;
 	$scope.onTouchend = touch.stop;
 
-	$scope.ballX = $scope.playerSide == 'left' ? $scope.mapWidth : 0;
+	$scope.ballX = $scope.mapWidth / 2;
 	$scope.ballY = $scope.mapHeight / 2;
 
 	$scope.ballPosition = "left:" + $scope.ballX + "px; top:" + $scope.ballY + "px";
@@ -142,21 +143,43 @@ angularGameApp.controller('GameCtrl', function($scope, $rootScope, $routeParams,
 		});
 
 		socket.on('change:side', function(data){
+			ball.pause();
+			
+			ball.notified = false;
+			
+			console.log('changeSide', data);
+			console.log('before' + ball.pace.x + ' after : ' + data.pace.x);
 			ball.pace = data.pace;
-			ball.setCoords(data.position);
+			$scope.ballY = data.position.top;
+			$scope.ballX = $scope.playerSide == 'left' 
+							? $scope.mapWidth - data.position.left
+							: data.position.left - $scope.mapWidth;
 			ball.resume();
 		});
 
 		socket.on('gameOver', function(data){
+			var winner = $scope.playerSide == data.winner;
+			$scope.won = winner ? 'won :)' : 'lost :(';
+			$scope.gameOver = true;
 			$scope.score = data.score;
-			console.error('You ' + ($scope.playerSide == data.winner) ? 'WON :)' : 'LOST :(');
+			console.error($scope.won,data);
 		});
 
 		socket.on('startGame', function(data){
-			ball.pace.x = data.x;
+			$scope.ballX = $scope.mapWidth / 2;
+			$scope.ballY = $scope.mapHeight / 2;
+			if($scope.playerSide == 'right')
+				$scope.ballX -= $scope.mapWidth; /*
+			$scope.ballX = $scope.playerSide == 'left' ? $scope.mapWidth : 0;
+			$scope.ballY = $scope.mapHeight / 2;*/
+			ball.pace.x = ($scope.playerSide == 'left' ? 1 : -1) * data.x;
 			ball.pace.y = data.y;
+			$scope.gameOver = false;
 			$scope.waiting = false;
+			console.log('startGame', data, ball.pace);
 			ball.init();
+			if($scope.playerSide =='left')
+				ball.analyze();
 		});
 
 		if($rootScope.connected)
@@ -166,9 +189,10 @@ angularGameApp.controller('GameCtrl', function($scope, $rootScope, $routeParams,
 			notifyServer : function(){
 				socket.emit('change:side', {
 					pace : {
-						x : $scope.playerSide == 'right'
-								? ball.bounderies.right + ball.$el.width()
-								: ball.bounderies.left - ball.$el.width(),
+					/*	x : $scope.playerSide == 'left'
+								? - ball.$el.width()
+								: ball.bounderies.left + ball.$el.width(),*/
+						x : ball.pace.x,
 						y : ball.pace.y
 					},
 					position : ball.getCoords()					
@@ -220,9 +244,9 @@ angularGameApp.controller('GameCtrl', function($scope, $rootScope, $routeParams,
 					ball.pace.y = values[$.inArray(Math.min.apply(Math, absValues), absValues)]  * ball.pace.value;
 				}
 
-			ball.analyze();
+		//	ball.analyze();
 		},
-		move : function(){
+		move : function(){if(window.X)return;
 			ball.pause();
 
 			$scope.ballY += ball.pace.y;
@@ -263,6 +287,7 @@ angularGameApp.controller('GameCtrl', function($scope, $rootScope, $routeParams,
 									// update the notified flag, so we only notify the server once
 									ball.notified = true;
 
+									console.log('NOTIFY');
 									// notify the server to send the ball to the other player's court
 									io.notifyServer();
 								}
@@ -304,6 +329,7 @@ angularGameApp.controller('GameCtrl', function($scope, $rootScope, $routeParams,
 									ball.notified = true;
 
 									// notify the server to send the ball to the other player's court
+									console.log('NOTIFY 2');
 									io.notifyServer();
 								}
 							// the server is notified and the ball isn't visible in our court any more
@@ -336,6 +362,7 @@ angularGameApp.controller('GameCtrl', function($scope, $rootScope, $routeParams,
 			else
 				{
 					io.emit('lost');
+					ball.pause();
 
 	/*				// sample for now
 					io.trigger('gameOver', {
@@ -367,5 +394,9 @@ angularGameApp.controller('GameCtrl', function($scope, $rootScope, $routeParams,
 	$scope.io = io;
 	$scope.$timeout = $timeout;
 	$scope.socket = socket;
+
+	$scope.restartGame = function(){
+		io.emit('restart');
+	}
 
 });

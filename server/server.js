@@ -47,6 +47,8 @@ io.sockets.on('connection', function (socket) {
 		});*/
 
 		socket.on('change:side', function(data){
+			data.timestamp = new Date().getTime();
+			data.from = socket.user.name;
 			console.log('change:side', data);
 			socket.game.emitToOtherThan(socket, 'change:side', data);
 		});
@@ -55,10 +57,10 @@ io.sockets.on('connection', function (socket) {
 			socket.game.broadcast('gameOver', {
 				winner : socket.side == 'left' ? 'right' : 'left'
 			});
+		});
 
-			setTimeout(function(){
-				socket.game.start()
-			}, 1000);
+		socket.on('restart', function(){
+			socket.game.start();	
 		});
 
 		socket.on('disconnect', function(){
@@ -120,7 +122,7 @@ game.prototype = {
 
 	start : function(){
 		var pace = {
-			value : 10,
+			value : 20,
 			randomAngle : Math.random() * 360 * 0.0174532925,
 			x : 0,
 			y : 0

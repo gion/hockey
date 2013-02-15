@@ -1,7 +1,6 @@
 'use strict';
 
 angularGameApp.controller('MainCtrl', function($scope, $rootScope, socket) {
-	$scope.token = new Date().getTime().toString().substr(Math.floor(Math.random() * 5), 5);
 	$scope.name = 'no-name';
 	$scope.$watch(function(){
 		return $scope.token + '|' + $scope.name;
