@@ -1,6 +1,6 @@
 'use strict';
 
-angularGameApp.controller('MainCtrl', function($scope, $rootScope, socket) {
+angularGameApp.controller('MainCtrl', ['$scope', '$rootScope', 'socket', function($scope, $rootScope, socket) {
 	$scope.name = 'no-name';
 	$scope.$watch(function(){
 		return $scope.token + '|' + $scope.name;
@@ -27,4 +27,4 @@ angularGameApp.controller('MainCtrl', function($scope, $rootScope, socket) {
 			})
 		})
 	});
-});
+}]);

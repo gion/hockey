@@ -1,10 +1,8 @@
 'use strict';
 
-angularGameApp.factory('socket', function ($rootScope, $window) {
-  var socket = $window.io.connect('http://192.168.1.148:8181');
-/*  socket.on('message', function(data){
-    console.log('message', data);
-  });*/
+angularGameApp.factory('socket', ['$rootScope', '$window', 'config', function ($rootScope, $window, config) {
+  var socket = $window.io.connect(config.socketAddress);
+
   return {
     on: function (eventName, callback) {
       socket.on(eventName, function () {  
@@ -25,4 +23,4 @@ angularGameApp.factory('socket', function ($rootScope, $window) {
       })
     }
   };
-});
+}]);
