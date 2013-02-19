@@ -2,7 +2,7 @@
 
 angularGameApp.controller('MainCtrl', ['$scope', '$rootScope', 'socket', function($scope, $rootScope, socket) {
 	$scope.name = 'no-name';
-	$scope.games = [{link : "#", name : "no name", inplay : true}, {link : "#", name : "no name", inplay : false} , {link : "#", name : "no name", inplay : true}];
+	$scope.games = [];
 
 	$scope.$watch(function(){
 		return $scope.token + '|' + $scope.name;
@@ -15,14 +15,16 @@ angularGameApp.controller('MainCtrl', ['$scope', '$rootScope', 'socket', functio
 	socket.on('connect', function(){
 		$rootScope.connected = true;
 		socket.emit('change:name',$scope.name);
+		socket.connected = true;
+
 		socket.on('set:id', function(id){
 			socket.id = id;
 			$scope.token = id;
 
-			socket.emit('add:user', {
+/*			socket.emit('add:user', {
 				token : $scope.token,
 				name : $scope.name
-			});
+			});*/
 
 			socket.on('initPlayer', function(){
 				console.log('init player from main');

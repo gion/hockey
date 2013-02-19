@@ -1,6 +1,6 @@
 'use strict';
 
-angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", "$q", "$timeout", "socket", function($scope, $rootScope, $routeParams, $q, $timeout, socket) {
+angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", "$q", "$timeout", "socket" , "animationFrame", '$window', function($scope, $rootScope, $routeParams, $q, $timeout, socket, animationFrame, $window) {
 	// number of pixels that the "goalkeeper" can move at a time
 
 	//window.X = 1;
@@ -60,8 +60,26 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 		stopEvent = function(e){
 			e.preventDefault();
 			e.stopPropagation();
-		};
+		},
 
+		playSound = function(){
+			var sound = 'shout1';
+			if (window.HTMLAudioElement) {
+				var snd = new Audio('');
+
+				if(snd.canPlayType('audio/ogg')) {
+					snd = new Audio('sounds/' + sound + '.ogg');
+				}else if(snd.canPlayType('audio/mp3')) {
+					snd = new Audio('sounds/' + sound + '.mp3');
+				}
+				snd.play();
+			}else{
+				alert('HTML5 Audio is not supported by your browser!');
+			}
+		}
+	$scope.playSound = function(){
+		playSound();
+	}
 
 	$scope.name = $routeParams.name || 'unnamed';
 	$scope.waiting = true;
@@ -122,25 +140,28 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 		$scope['moveGoalKeeper' + (delta < 0 ? 'Down' : 'Up')]();
 	}
 
-	$scope.restartGame = function(){
-		console.log('client emit restart to server');
+	$scope.restartGame = function(e){
 		io.emit('restart');
-	}
-	$scope.all = function(){
-		alert('dddddddddd');
 	}
 
 	var io = (function(){
-		socket.on('connect', function(){
-
+		if(socket.connected){
 			socket.emit('add:user', {
 				token : $routeParams.token,
-				name : prompt('And you are...') || 'no-name'
+				name : $routeParams.name
 			});
+		}else{
+			socket.on('connect', function(){
+				socket.emit('add:user', {
+					token : $routeParams.token,
+					name : prompt('And you are...') || 'no-name'
+				});
 
-			socket.emit('ready');
+				socket.emit('ready');
 
-		});
+			});
+		}
+
 
 		socket.on('initPlayer', function(data){
 			console.log('init player', data);
@@ -258,7 +279,8 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 
 		//	ball.analyze();
 		},
-		move : function(){if(window.X)return;
+		move : function(){
+			//if(window.X)return;
 			ball.pause();
 
 			$scope.ballY += ball.pace.y;
@@ -283,6 +305,7 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 								{
 									// reject the ball (change it's direction)
 									ball.pace.x *= -1;
+									playSound();
 								}
 							else 
 								{
@@ -324,6 +347,7 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 								{
 									// reject the ball (change it's direction)
 									ball.pace.x *= -1;
+									playSound();
 								}
 							else 
 								{
@@ -364,10 +388,7 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 			if(!gameOver)
 				{
 
-					ball.timeout = $timeout(function(){
-				//	ball.timeout = setTimeout(function(){
-						ball.move();
-					}, ball.frameDuration);
+					ball.timeout = $window.start(ball.move());
 
 				}
 
@@ -389,12 +410,10 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 		//	return deferred.propmise;
 		},
 		pause : function(force){
-			$timeout.cancel(ball.timeout);
+			$window.stop(ball.timeout);
 			
 			if(force)
-				setTimeout(function(){
-					$timeout.cancel(ball.timeout);			
-				});
+				$window.stop(ball.timeout);
 		},
 		resume : function(){
 			ball.analyze();

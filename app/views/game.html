@@ -17,10 +17,6 @@
     </div>
     <div id="game-over" class="hero-unit">
         <h1>You have {{won}}</h1>
-        <button ng-click="all()">Play another game</button>
-        <button ng-click="count = count + 1" ng-init="count=0">
-            Increase
-        </button>
-        Count: {{count}}
+        <button ui-event='{"click":"restartGame()"}' ng-click="restartGame();">Play another game</button>
     </div>
 </div>

@@ -128,7 +128,7 @@ game.prototype = {
 
 	start : function(){
 		var pace = {
-			value : 20,
+			value : 10,
 			randomAngle : Math.random() * 360 * 0.0174532925,
 			x : 0,
 			y : 0
