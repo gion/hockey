@@ -29,9 +29,9 @@ angularGameApp.controller('MainCtrl', ['$scope', '$rootScope', 'socket', functio
 			})
 		});
 		socket.on('change:games', function(games){
-			console.log('change games', games);
+			//console.log('change games', games);
 			$scope.games = games;
-			$scope.$apply();
+			//$scope.$apply();
 		})
 	});
 }]);

@@ -4,9 +4,9 @@
   <p>Click on the following link : <a href="{{link}}">{{link}}</a>, send it to your friend and wait for the game to start.</p>
   <p>Who will be the next hockey master? Have you got what it takes? Go kick some ass!</p>
   <h3>or select already started game</h3>
-  <ul>
+  <ul class="games-list">
   	<li ng-repeat="game in games" ng-class="{'disabled' : game.inplay}">
-        	<a ng-show="!game.inplay" href="{{game.link}}"> {{game.name}} </a>
+        	<a ng-show="!game.inplay" href="#/{{game.token}}/{{game.name}}"> {{game.name}} </a>
         	<span ng-show="game.inplay"> {{game.name}} </span>
     </li>
   </ul>

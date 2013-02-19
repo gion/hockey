@@ -9,6 +9,9 @@ io.sockets.on('connection', function (socket) {
 
 	socket.on('change:name', function (name) {
 		socket.user.name = name;
+		try{
+			socket.game.updateGames();
+		}catch(e){}
 	});
 
 
@@ -113,6 +116,7 @@ game.prototype = {
 				// "update" the player
 				player.emit('initPlayer', player.user);
 			}
+		this.updateGames();
 
 		return this;
 	},
@@ -136,6 +140,7 @@ game.prototype = {
 			x : values[absValues.indexOf(Math.max.apply(Math, absValues))] * pace.value,
 			y : values[absValues.indexOf(Math.min.apply(Math, absValues))] * pace.value
 		});
+		this.updateGames();
 	},
 
 	disconnect : function(){
@@ -166,15 +171,14 @@ game.prototype = {
 			if(game.games.hasOwnProperty(id) && game.games[id] instanceof game){
 				var item = game.games[id],
 					players = item.getPlayers();
-				console.log(players);
 				if(!players.length)
 					continue;
+				//console.log(players[0].user.name);
 				games.push({
 					token : id,
-					name : players[0].user.name,
+					name : players[0].user.name ? players[0].user.name : 'no-name',
 					inplay : item.getPlayers().length >= this.maxPlayerCount
 				});
-				console.log(games);
 			}
 		io.sockets.emit('change:games', games);
 	}

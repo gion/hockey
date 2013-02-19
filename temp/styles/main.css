@@ -6248,8 +6248,8 @@ a.label:hover, a.badge:hover {
 /* line 109, ../../app/styles/main.scss */
 .ball-wrapper {
   position: relative;
-  width: 30px;
-  height: 30px;
+  width: 80px;
+  height: 80px;
   margin-left: -50%;
   margin-top: -50%;
 }
@@ -6309,4 +6309,9 @@ a.label:hover, a.badge:hover {
 /* line 170, ../../app/styles/main.scss */
 .disabled {
   color: red;
+}
+
+/* line 173, ../../app/styles/main.scss */
+.games-list {
+  list-style: none;
 }

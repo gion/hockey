@@ -3,7 +3,7 @@
 
 
 // vars
-$ballWidth : 30px;
+$ballWidth : 80px;
 $bgColor : #fff;
 $borderWidth : 10px;
 $borderColor : rgba(0,0,0,.85);
@@ -169,4 +169,11 @@ $mapBackground : url(http://www.luminvision.co.uk/images/hockey.jpg) no-repeat;
 
 .disabled{
 	color: red;
+}
+.games-list{
+	list-style: none;
+
+	li{
+			
+	}
 }

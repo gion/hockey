@@ -1,11 +1,10 @@
 'use strict';
 
-angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", "$q", "$timeout", "socket", 
-	function($scope, $rootScope, $routeParams, $q, $timeout, socket) {
+angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", "$q", "$timeout", "socket", function($scope, $rootScope, $routeParams, $q, $timeout, socket) {
 	// number of pixels that the "goalkeeper" can move at a time
 
 	//window.X = 1;
-	var pace = 15,
+	var pace = 30,
 		touch  = {
 			first : {
 				x : null,
@@ -61,7 +60,7 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 		stopEvent = function(e){
 			e.preventDefault();
 			e.stopPropagation();
-		}
+		};
 
 
 	$scope.name = $routeParams.name || 'unnamed';
@@ -123,7 +122,13 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 		$scope['moveGoalKeeper' + (delta < 0 ? 'Down' : 'Up')]();
 	}
 
-
+	$scope.restartGame = function(){
+		console.log('client emit restart to server');
+		io.emit('restart');
+	}
+	$scope.all = function(){
+		alert('dddddddddd');
+	}
 
 	var io = (function(){
 		socket.on('connect', function(){
@@ -402,8 +407,5 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 	$scope.$timeout = $timeout;
 	$scope.socket = socket;
 
-	$scope.restartGame = function(){
-		io.emit('restart');
-	}
 
 }]);
