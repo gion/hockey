@@ -1,6 +1,7 @@
 'use strict';
 
-angularGameApp.controller('GameCtrl', function($scope, $rootScope, $routeParams, $q, $timeout, socket) {
+angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", "$q", "$timeout", "socket", 
+	function($scope, $rootScope, $routeParams, $q, $timeout, socket) {
 	// number of pixels that the "goalkeeper" can move at a time
 
 	//window.X = 1;
@@ -405,4 +406,4 @@ angularGameApp.controller('GameCtrl', function($scope, $rootScope, $routeParams,
 		io.emit('restart');
 	}
 
-});
+}]);
