@@ -1,14 +1,15 @@
 'use strict';
 
 angularGameApp.controller('MainCtrl', function($scope, $rootScope, socket) {
-	$scope.name = 'no-name';
+	$scope.name = 'bla bla bla';
+	$scope.games = [{link : "#", name : "no name", inplay : true}, {link : "#", name : "no name", inplay : false} , {link : "#", name : "no name", inplay : true}];
 	$scope.$watch(function(){
 		return $scope.token + '|' + $scope.name;
 	},function(newVal, oldVal){
 		$scope.link = !!$scope.name ? window.location.toString() + $scope.token + '/' + window.encodeURIComponent($scope.name): '';
 		socket.emit('change:name', $scope.name);
 	});
-		window.s = socket;
+//		window.s = socket;
 
 	socket.on('connect', function(){
 		$rootScope.connected = true;
@@ -25,6 +26,11 @@ angularGameApp.controller('MainCtrl', function($scope, $rootScope, socket) {
 			socket.on('initPlayer', function(){
 				console.log('init player from main');
 			})
+		});
+		socket.on('change:games', function(games){
+			console.log('change games', games);
+			$scope.games = games;
+			$scope.$apply();
 		})
 	});
 });

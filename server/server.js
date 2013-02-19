@@ -74,7 +74,9 @@ var game = function(id){
 	this.id = id;
 	game.games[id] = this;
 	game.games.count++;
+	this.updateGames();
 }
+
 game.games = {
 	count : 0
 };
@@ -137,7 +139,11 @@ game.prototype = {
 	},
 
 	disconnect : function(){
+		this.broadcast('error:disconnect', 'sry');
 
+		delete game.games[this.id];
+		game.games.count--;
+		this.updateGames();
 	},
 
 	broadcast : function(event, data){
@@ -153,5 +159,23 @@ game.prototype = {
 				players[i].emit(event, data);
 
 		return this;
+	},
+	updateGames : function(){
+		var games = [];
+		for(var id in game.games)
+			if(game.games.hasOwnProperty(id) && game.games[id] instanceof game){
+				var item = game.games[id],
+					players = item.getPlayers();
+				console.log(players);
+				if(!players.length)
+					continue;
+				games.push({
+					token : id,
+					name : players[0].user.name,
+					inplay : item.getPlayers().length >= this.maxPlayerCount
+				});
+				console.log(games);
+			}
+		io.sockets.emit('change:games', games);
 	}
 };

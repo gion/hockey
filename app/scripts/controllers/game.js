@@ -182,6 +182,12 @@ angularGameApp.controller('GameCtrl', function($scope, $rootScope, $routeParams,
 				ball.analyze();
 		});
 
+		socket.on('error:disconnect', function(data){
+			var wait = confirm("sry, but your opponent has been disconnected. Do You want to wait for other players to join?");
+			if(!wait)
+				window.location = '';
+		});
+
 		if($rootScope.connected)
 			socket.emit('ready');
 
