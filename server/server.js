@@ -2,7 +2,9 @@
 //var io = require('../components/socket.io').listen(8181);
 var io = require('/usr/local/lib/node_modules/socket.io').listen(8181);
 
-io.set('log level', '2');
+//console.log("SERVER STARTED");
+
+//io.set('log level', '2');
 io.sockets.on('connection', function (socket) {
 	socket.user = {};
 	socket.emit('set:id', socket.id);
@@ -50,7 +52,8 @@ io.sockets.on('connection', function (socket) {
 		socket.on('change:side', function(data){
 			data.timestamp = new Date().getTime();
 			data.from = socket.user.name;
-			console.log('change:side', data);
+			console.log('change:side');
+			console.log(data);
 			socket.game.emitToOtherThan(socket, 'change:side', data);
 		});
 
@@ -156,18 +159,20 @@ game.prototype = {
 
 	start : function(){
 		var pace = {
-			value : 12,
+			value : .000000001,
 			randomAngle : Math.random() * 360 * 0.0174532925,
 			x : 0,
 			y : 0
 		},
 			values = [Math.cos(pace.randomAngle), Math.sin(pace.randomAngle)],
-			absValues = values.map(function(el, i){return Math.abs(el);});
+			absValues = values.map(function(el, i){return Math.abs(el);}),
+			gamePace = {
+				x : values[absValues.indexOf(Math.max.apply(Math, absValues))] * pace.value,
+				y : values[absValues.indexOf(Math.min.apply(Math, absValues))] * pace.value
+			};
 
-		this.broadcast('startGame', {
-			x : values[absValues.indexOf(Math.max.apply(Math, absValues))] * pace.value,
-			y : values[absValues.indexOf(Math.min.apply(Math, absValues))] * pace.value
-		});
+		console.log(gamePace);
+		this.broadcast('startGame', gamePace);
 		game.updateGames();
 	},
 

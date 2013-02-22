@@ -62,8 +62,8 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 			e.stopPropagation();
 		},
 
-		
-		
+
+
 		playSound = function(){
 			var sound = 'shout1';
 			if (window.HTMLAudioElement) {
@@ -91,8 +91,8 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 	$scope.mapHeight = 400;
 	$scope.mapWidth = 600;
 
-	$scope.goalKeeperY = 125;
-	$scope.goalKeeperHeight = 150;
+	$scope.goalKeeperY = 150;
+	$scope.goalKeeperHeight = 200;
 
 
 	$scope.onTouchStart = touch.start;
@@ -198,12 +198,14 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 		socket.on('startGame', function(data){
 			$scope.ballX = $scope.mapWidth / 2;
 			$scope.ballY = $scope.mapHeight / 2;
+
 			if($scope.playerSide == 'right')
 				$scope.ballX -= $scope.mapWidth; /*
 			$scope.ballX = $scope.playerSide == 'left' ? $scope.mapWidth : 0;
 			$scope.ballY = $scope.mapHeight / 2;*/
 			ball.pace.x = ($scope.playerSide == 'left' ? 1 : -1) * data.x;
 			ball.pace.y = data.y;
+			console.log(ball.pace.x, ball.pace.y);
 			$scope.gameOver = false;
 			$scope.waiting = false;
 			console.log('startGame', data, ball.pace);
@@ -282,8 +284,9 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 			
 
 			
-			$scope.goalKeeperY = 125;
-			$scope.goalKeeperHeight = 150;
+					
+			$scope.goalKeeperY = 150;
+			$scope.goalKeeperHeight = 200;
 			
 			ball.bounderies = {
 				left : ball.$el.width() / 2,

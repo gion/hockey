@@ -6,7 +6,7 @@
   <h3>or select already started game</h3>
   <ul class="games-list">
   	<li ng-repeat="game in games" ng-class="{'disabled' : game.inplay}">
-        	<a ng-show="!game.inplay" href="#/{{game.token}}/{{game.name}}"> {{game.name}} </a>
+        	<a ng-show="!game.inplay" href="#/{{game.token}}/{{name}}"> {{game.name}} </a>
         	<span ng-show="game.inplay"> {{game.name}} </span>
     </li>
   </ul>
