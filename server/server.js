@@ -4,7 +4,7 @@ var io = require('/usr/local/lib/node_modules/socket.io').listen(8181);
 
 //console.log("SERVER STARTED");
 
-//io.set('log level', '2');
+io.set('log level', '2');
 io.sockets.on('connection', function (socket) {
 	socket.user = {};
 	socket.emit('set:id', socket.id);
@@ -59,7 +59,7 @@ io.sockets.on('connection', function (socket) {
 
 		socket.on('lost', function(){
 			socket.game.broadcast('gameOver', {
-				winner : socket.side == 'left' ? 'right' : 'left'
+				winner : socket.user.side == 'left' ? 'right' : 'left'
 			});
 		});
 
@@ -159,7 +159,7 @@ game.prototype = {
 
 	start : function(){
 		var pace = {
-			value : .000000001,
+			value : 5,
 			randomAngle : Math.random() * 360 * 0.0174532925,
 			x : 0,
 			y : 0
