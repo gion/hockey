@@ -7,6 +7,10 @@ var angularGameApp = angular.module('angularGameApp', ['ui'])
         templateUrl: 'views/main.html',
         controller: 'MainCtrl'
       })
+      .when('/:token', {
+        templateUrl: 'views/game.html',
+        controller: 'GameCtrl'
+      })
       .when('/:token/:name', {
         templateUrl: 'views/game.html',
         controller: 'GameCtrl'

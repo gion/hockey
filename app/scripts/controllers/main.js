@@ -1,15 +1,20 @@
 'use strict';
 
-angularGameApp.controller('MainCtrl', ['$scope', '$rootScope', 'socket', function($scope, $rootScope, socket) {
+angularGameApp.controller('MainCtrl', ['$scope', '$rootScope', 'socket', '$location', function($scope, $rootScope, socket, $location) {
 	$scope.name = 'no-name';
 	$scope.games = [];
 
 	$scope.$watch(function(){
 		return $scope.token + '|' + $scope.name;
 	},function(newVal, oldVal){
-		$scope.link = !!$scope.name ? window.location.toString() + $scope.token + '/' + window.encodeURIComponent($scope.name): '';
+		$scope.relativeLink = !!$scope.name ? $scope.token + '/' + window.encodeURIComponent($scope.name): '';
+		$scope.link = !!$scope.name ? window.location.toString() + $scope.token : '';
 		socket.emit('change:name', $scope.name);
 	});
+
+	$scope.goToLink = function(){
+		$location.path($scope.relativeLink);
+	}
 //		window.s = socket;
 
 	socket.on('connect', function(){

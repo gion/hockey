@@ -58,8 +58,18 @@ io.sockets.on('connection', function (socket) {
 		});
 
 		socket.on('lost', function(){
+			var winner = socket.user.side == 'left' ? 'right' : 'left',
+				score = [];
+			
+			socket.game.getPlayers().forEach(function(el, i){
+				el.id != socket.id && el.user.score++;
+				score.push({name:el.user.name, score:el.user.score});
+			});
+
 			socket.game.broadcast('gameOver', {
-				winner : socket.user.side == 'left' ? 'right' : 'left'
+			//	winner : winner,
+				foo : 'bar',
+				score : score
 			});
 		});
 
@@ -97,10 +107,24 @@ game.updateGames = function(){
 			if(!players.length)
 				continue;
 			//console.log(players[0].user.name);
+			var name = players[0].user.name ? players[0].user.name : 'no-name',
+				namePrefix = 0;
+
+
+			games.forEach(function(el, i){
+				new RegExp(name + '(\\s\\(\\d+\\))?').test(el.name) && namePrefix++;
+				console.log(el.name, new RegExp(name + '(\\s\\(\\d+\\))?').test(el.name), namePrefix);
+				io.sockets.emit('log', [el.name, new RegExp(name + '(\\s\\(\\d+\\))?').test(el.name), namePrefix]);
+
+			});
+
+			if(namePrefix)
+				name += ' ('+ namePrefix +')';
+
 			games.push({
 				token : id,
-				name : players[0].user.name ? players[0].user.name : 'no-name',
-				inplay : item.getPlayers().length >= this.maxPlayerCount
+				name : name,
+				inplay : players.length >= this.maxPlayerCount
 			});
 		}
 	io.sockets.emit('change:games', games);
@@ -148,10 +172,13 @@ game.prototype = {
 				player.emit('initPlayer', player.user);
 			}
 		game.updateGames();
+		this.resetScores();
+
 		return this;
 	},
 
 	remove : function(player){
+		this.resetScores();
 		player.leave(this.id);
 		game.updateGames();
 		return this;
@@ -182,6 +209,8 @@ game.prototype = {
 		delete game.games[this.id];
 		game.games.count--;
 		game.updateGames();
+		this.resetScores();
+
 	},
 
 	broadcast : function(event, data){
@@ -198,6 +227,13 @@ game.prototype = {
 
 		return this;
 	},
+
+	resetScores : function(){
+		var players = this.getPlayers();
+		for(var i=0;i<players.length;i++)
+			players[i].user.score = 0;
+	},
+
 	updateGames : function(){
 		var games = [];
 		for(var id in game.games)

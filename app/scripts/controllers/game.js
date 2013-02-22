@@ -1,6 +1,6 @@
 'use strict';
 
-angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", "$q", "$timeout", "socket" , "animationFrame", function($scope, $rootScope, $routeParams, $q, $timeout, socket, animationFrame) {
+angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", "$q", "$timeout", "socket" , "animationFrame", "$location", function($scope, $rootScope, $routeParams, $q, $timeout, socket, animationFrame, $location) {
 	// number of pixels that the "goalkeeper" can move at a time
 	window.animationFrame = animationFrame;
 	//window.X = 1;
@@ -83,7 +83,17 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 		playSound();
 	}
 
-	$scope.name = $routeParams.name || 'unnamed';
+
+	var name = $routeParams.name;
+	if(!name)
+		{
+			name = prompt('And you are...');
+			$location.path($routeParams.token + '/' + name);
+		}
+	else
+		name = window.decodeURIComponent(name);
+	$scope.name = name;
+
 	$scope.waiting = true;
 	$scope.playerSide = 'left';
 	$scope.gameOver =  false;
@@ -128,6 +138,17 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 		}
 	});
 
+	$scope.score = [];
+	$scope.scoreboard = '';
+
+	$scope.$watch(function(){
+		return $scope.score && $scope.score.length >= 2 ?$scope.score[0].score + '|' + $scope.score[1].score : '';
+	}, function(){
+		var newVal = $scope.score;
+		if(newVal && newVal.length && newVal.length >= 2)
+			$scope.scoreboard = newVal[0].name + ' '  + newVal[0].score + '  -  ' + newVal[1].score + ' ' + newVal[1].name;
+	});
+
 
 	$scope.moveGoalKeeperUp = function(e){
 		updateGoalKeeper($scope.goalKeeperY - pace);
@@ -148,22 +169,26 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 	}
 
 	var io = (function(){
-		if(socket.connected){
-			socket.emit('add:user', {
-				token : $routeParams.token,
-				name : $routeParams.name
-			});
-		}else{
-			socket.on('connect', function(){
+		if(socket.connected)
+			{
 				socket.emit('add:user', {
 					token : $routeParams.token,
-					name : prompt('And you are...') || 'no-name'
+					name : $scope.name
 				});
+			}
+		else
+			{
+				
+				socket.on('connect', function(){
+					socket.emit('add:user', {
+						token : $routeParams.token,
+						name : $scope.name
+					});
 
-				socket.emit('ready');
+					socket.emit('ready');
 
-			});
-		}
+				});
+			}
 
 
 		socket.on('initPlayer', function(data){
@@ -188,6 +213,7 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 		});
 
 		socket.on('gameOver', function(data){
+			console.log('gameOver', data);
 			var winner = $scope.playerSide == data.winner;
 			$scope.won = winner ? 'won :)' : 'lost :(';
 			$scope.gameOver = true;

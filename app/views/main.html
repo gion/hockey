@@ -1,13 +1,16 @@
 <div class="hero-unit">
   <h1>Welcome to the most amazing game ever!</h1>
-  <h3>Enter your name : </h3><input data-ng-model="name" required>
-  <p>Click on the following link : <a href="{{link}}">{{link}}</a>, send it to your friend and wait for the game to start.</p>
+  <h3>Enter your name : </h3><input data-ng-model="name" required ui-keypress="{13:'goToLink($event)'}">
+  <button ng-click="goToLink($event)">start game</button>
+  <p>Want to play with a certain friend? Send him this link :  <a href="{{link}}">{{link}}</a> and wait for the game to start.</p>
   <p>Who will be the next hockey master? Have you got what it takes? Go kick some ass!</p>
-  <h3>or select already started game</h3>
-  <ul class="games-list">
-  	<li ng-repeat="game in games" ng-class="{'disabled' : game.inplay}">
-        	<a ng-show="!game.inplay" href="#/{{game.token}}/{{name}}"> {{game.name}} </a>
-        	<span ng-show="game.inplay"> {{game.name}} </span>
-    </li>
-  </ul>
+  <div ng-show="games.length">
+	  <h3>or select already started game</h3>
+	  <ul class="games-list">
+	  	<li ng-repeat="game in games" ng-class="{'disabled' : game.inplay}">
+	        	<a ng-show="!game.inplay" href="#/{{game.token}}/{{name}}"> {{game.name}} </a>
+	        	<span ng-show="game.inplay"> {{game.name}} </span>
+	    </li>
+	  </ul>
+  </div>
 </div>

@@ -3,7 +3,7 @@
 angularGameApp.factory('config', ['$rootScope', '$window', function ($rootScope, $window) {
 
   var config = {
-    socketUrl : 'http://192.168.1.104',
+    socketUrl : 'http://192.168.1.148',
     socketPort : '8181'
   };
 
