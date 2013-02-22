@@ -1,11 +1,10 @@
 'use strict';
 
-angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", "$q", "$timeout", "socket", 
-	function($scope, $rootScope, $routeParams, $q, $timeout, socket) {
+angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", "$q", "$timeout", "socket" , "animationFrame", function($scope, $rootScope, $routeParams, $q, $timeout, socket, animationFrame) {
 	// number of pixels that the "goalkeeper" can move at a time
-
+	window.animationFrame = animationFrame;
 	//window.X = 1;
-	var pace = 15,
+	var pace = 30,
 		touch  = {
 			first : {
 				x : null,
@@ -61,8 +60,28 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 		stopEvent = function(e){
 			e.preventDefault();
 			e.stopPropagation();
-		}
+		},
 
+		
+		
+		playSound = function(){
+			var sound = 'shout1';
+			if (window.HTMLAudioElement) {
+				var snd = new Audio('');
+
+				if(snd.canPlayType('audio/ogg')) {
+					snd = new Audio('sounds/' + sound + '.ogg');
+				}else if(snd.canPlayType('audio/mp3')) {
+					snd = new Audio('sounds/' + sound + '.mp3');
+				}
+				snd.play();
+			}else{
+				alert('HTML5 Audio is not supported by your browser!');
+			}
+		}
+	$scope.playSound = function(){
+		playSound();
+	}
 
 	$scope.name = $routeParams.name || 'unnamed';
 	$scope.waiting = true;
@@ -124,19 +143,28 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 		$scope['moveGoalKeeper' + (delta < 0 ? 'Down' : 'Up')]();
 	}
 
-
+	$scope.restartGame = function(e){
+		io.emit('restart');
+	}
 
 	var io = (function(){
-		socket.on('connect', function(){
-
+		if(socket.connected){
 			socket.emit('add:user', {
 				token : $routeParams.token,
-				name : prompt('And you are...') || 'no-name'
+				name : $routeParams.name
 			});
+		}else{
+			socket.on('connect', function(){
+				socket.emit('add:user', {
+					token : $routeParams.token,
+					name : prompt('And you are...') || 'no-name'
+				});
 
-			socket.emit('ready');
+				socket.emit('ready');
 
-		});
+			});
+		}
+
 
 		socket.on('initPlayer', function(data){
 			console.log('init player', data);
@@ -184,6 +212,12 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 				ball.analyze();
 		});
 
+		socket.on('error:disconnect', function(data){
+			var wait = confirm("sry, but your opponent has been disconnected. Do You want to wait for other players to join?");
+			if(!wait)
+				window.location = '';
+		});
+
 		if($rootScope.connected)
 			socket.emit('ready');
 
@@ -205,8 +239,6 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 			trigger : socket.emit
 		}
 	})();
-
-
 
 	var ball = {
 		frameDuration : 30,
@@ -270,11 +302,15 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 
 		//	ball.analyze();
 		},
-		move : function(){if(window.X)return;
+		move : function(){
+			if(window.X)
+				return;
 			ball.pause();
 
 			$scope.ballY += ball.pace.y;
 			$scope.ballX += ball.pace.x;
+
+			$scope.$apply();
 
 		//	$scope.ballPosition = 
 			ball.analyze();
@@ -283,6 +319,7 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 		analyze : function(){
 			var pos = ball.getCoords(),
 				gameOver = false;
+				console.log(ball.$el.width());
 
 			// if the ball exeedes the left boundery
 			if(pos.left <= ball.bounderies.left)
@@ -298,6 +335,7 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 
 									// make the game more interesting >:)
 									ball.levelUp();
+									playSound();
 								}
 							else 
 								{
@@ -342,6 +380,7 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 
 									// make the game more interesting >:)
 									ball.levelUp();
+									playSound();
 								}
 							else 
 								{
@@ -381,18 +420,15 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 		//	var deferred = $q.defer();
 			if(!gameOver)
 				{
-
-					ball.timeout = $timeout(function(){
-				//	ball.timeout = setTimeout(function(){
-						ball.move();
-					}, ball.frameDuration);
-
+					ball.timeout = animationFrame.start(function(){
+						ball.move();	
+					});
 				}
 
 			else
 				{
 					io.emit('lost');
-					ball.pause();
+					ball.pause(true);
 
 	/*				// sample for now
 					io.trigger('gameOver', {
@@ -407,17 +443,21 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 		//	return deferred.propmise;
 		},
 		pause : function(force){
-			$timeout.cancel(ball.timeout);
-			
-			if(force)
+			animationFrame.stop(ball.timeout);
+			/*setTimeout(function(){
+			animationFrame.stop(ball.timeout);
+			},0)*/
+			if(force){
 				setTimeout(function(){
-					$timeout.cancel(ball.timeout);			
-				});
+					animationFrame.stop(ball.timeout);
+				},0)
+				//animationFrame.stop(ball.timeout);
+			}
 		},
 		resume : function(){
 			ball.analyze();
 		}
-	};
+	}
 
 
 	$scope.ball = ball;
@@ -425,8 +465,5 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 	$scope.$timeout = $timeout;
 	$scope.socket = socket;
 
-	$scope.restartGame = function(){
-		io.emit('restart');
-	}
 
 }]);

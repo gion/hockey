@@ -6,6 +6,7 @@ io.set('log level', '2');
 io.sockets.on('connection', function (socket) {
 	socket.user = {};
 	socket.emit('set:id', socket.id);
+	game.updateGames();
 
 	socket.on('change:name', function (name) {
 		socket.user.name = name;
@@ -79,9 +80,29 @@ var game = function(id){
 	game.games[id] = this;
 	game.games.count++;
 }
+
 game.games = {
 	count : 0
 };
+
+game.updateGames = function(){
+	var games = [];
+	for(var id in game.games)
+		if(game.games.hasOwnProperty(id) && game.games[id] instanceof game){
+			var item = game.games[id],
+				players = item.getPlayers();
+			if(!players.length)
+				continue;
+			//console.log(players[0].user.name);
+			games.push({
+				token : id,
+				name : players[0].user.name ? players[0].user.name : 'no-name',
+				inplay : item.getPlayers().length >= this.maxPlayerCount
+			});
+		}
+	io.sockets.emit('change:games', games);
+}
+
 
 game.prototype = {
 
@@ -123,18 +144,23 @@ game.prototype = {
 				// "update" the player
 				player.emit('initPlayer', player.user);
 			}
-
+		game.updateGames();
 		return this;
 	},
 
 	remove : function(player){
 		player.leave(this.id);
+		game.updateGames();
 		return this;
 	},
 
 	start : function(){
 		var pace = {
+<<<<<<< HEAD
 			value : 15,
+=======
+			value : 18,
+>>>>>>> 18f8fcf864863c9d8581361ac8a74b65f917a40d
 			randomAngle : Math.random() * 360 * 0.0174532925,
 			x : 0,
 			y : 0
@@ -146,10 +172,15 @@ game.prototype = {
 			x : values[absValues.indexOf(Math.max.apply(Math, absValues))] * pace.value,
 			y : values[absValues.indexOf(Math.min.apply(Math, absValues))] * pace.value
 		});
+		game.updateGames();
 	},
 
 	disconnect : function(){
+		this.broadcast('error:disconnect', 'sry');
 
+		delete game.games[this.id];
+		game.games.count--;
+		game.updateGames();
 	},
 
 	broadcast : function(event, data){
@@ -165,5 +196,22 @@ game.prototype = {
 				players[i].emit(event, data);
 
 		return this;
+	},
+	updateGames : function(){
+		var games = [];
+		for(var id in game.games)
+			if(game.games.hasOwnProperty(id) && game.games[id] instanceof game){
+				var item = game.games[id],
+					players = item.getPlayers();
+				if(!players.length)
+					continue;
+				//console.log(players[0].user.name);
+				games.push({
+					token : id,
+					name : players[0].user.name ? players[0].user.name : 'no-name',
+					inplay : item.getPlayers().length >= this.maxPlayerCount
+				});
+			}
+		io.sockets.emit('change:games', games);
 	}
 };

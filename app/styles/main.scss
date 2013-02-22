@@ -3,18 +3,22 @@
 
 
 // vars
-$ballWidth : 100px;
+$ballWidth : 80px;
 $bgColor : #fff;
 $borderWidth : 10px;
 $borderColor : rgba(0,0,0,.85);
 $minDimension : 200px;
-$mapBackground : url(http://www.luminvision.co.uk/images/hockey.jpg) no-repeat;
+$mapBackground : url(../img/bg.png) no-repeat;
+$mapBackgroundRight : url(../img/hockey-right.png) no-repeat;
 
-
+*{
+	-webkit-transform : translateZ(0);
+}
 
 .game-wrapper{
 	background: $bgColor;
 	position: relative;
+	overflow: hidden;
 
 	&.game-over{
 		#game-over{		
@@ -60,7 +64,7 @@ $mapBackground : url(http://www.luminvision.co.uk/images/hockey.jpg) no-repeat;
 		min-width : $minDimension;
 		position: relative;
 		background : $mapBackground;
-		background-size : 200% 100%;
+		background-size : 100% 100%;
 
 		.goal-container{
 			position : absolute;
@@ -80,10 +84,12 @@ $mapBackground : url(http://www.luminvision.co.uk/images/hockey.jpg) no-repeat;
 	}
 }
 
+
 .left-player{
 	.map{
 		float : right;
 		background-position : left;
+		background-size : 100% 100%;
 		border-top-right-radius : 0;
 		border-bottom-right-radius: 0;
 		.goal-container{
@@ -95,6 +101,8 @@ $mapBackground : url(http://www.luminvision.co.uk/images/hockey.jpg) no-repeat;
 	.map{
 		float : left;
 		background-position : right;
+		background : $mapBackgroundRight;
+		background-size : 100% 100%;
 		border-top-left-radius : 0;
 		border-bottom-left-radius: 0;
 		.goal-container{
@@ -164,4 +172,15 @@ $mapBackground : url(http://www.luminvision.co.uk/images/hockey.jpg) no-repeat;
 	top : 0;
 	left : 0;
 	padding : 10px;
+}
+
+.disabled{
+	color: red;
+}
+.games-list{
+	list-style: none;
+
+	li{
+			
+	}
 }
