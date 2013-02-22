@@ -75,6 +75,7 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 	$scope.goalKeeperY = 125;
 	$scope.goalKeeperHeight = 150;
 
+
 	$scope.onTouchStart = touch.start;
 	$scope.onTouchMove = touch.move;
 	$scope.onTouchend = touch.stop;
@@ -225,11 +226,33 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 			$scope.ballX = pos.left;
 			$scope.ballY = pos.top;
 		},
+
+		// function that handles any config modification 
+		// when the goalkeeper saves the ball
+		levelUp : function(){
+			var goalKeeperPace = 10;
+			var ballPaceFactor = 1.1;
+
+
+			ball.pace.x *= ballPaceFactor;
+			ball.pace.y *= ballPaceFactor;
+
+			if($scope.goalKeeperHeight < goalKeeperPace * 3)
+				return;
+
+			$scope.goalKeeperY += goalKeeperPace / 2;
+			$scope.goalKeeperHeight -= goalKeeperPace;
+		},
+
 		init : function(generateBallPosition){
 			ball.el = $('#ball');
 			ball.$el = $('.ball', ball.el);
 			
 
+			
+			$scope.goalKeeperY = 125;
+			$scope.goalKeeperHeight = 150;
+			
 			ball.bounderies = {
 				left : ball.$el.width() / 2,
 				top : ball.$el.height() / 2,
@@ -272,6 +295,9 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 								{
 									// reject the ball (change it's direction)
 									ball.pace.x *= -1;
+
+									// make the game more interesting >:)
+									ball.levelUp();
 								}
 							else 
 								{
@@ -313,6 +339,9 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 								{
 									// reject the ball (change it's direction)
 									ball.pace.x *= -1;
+
+									// make the game more interesting >:)
+									ball.levelUp();
 								}
 							else 
 								{

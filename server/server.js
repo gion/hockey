@@ -70,6 +70,10 @@ io.sockets.on('connection', function (socket) {
 	});
 });
 
+function clone(a) {
+   return JSON.parse(JSON.stringify(a));
+}
+
 var game = function(id){
 	this.id = id;
 	game.games[id] = this;
@@ -99,8 +103,16 @@ game.prototype = {
 		else
 			// add the player to the room
 			{
+
+				var remainingSides = clone(this.sides);
+
+				players.forEach(function(el, i){
+					if(el.user && el.user.side)
+						remainingSides.splice(remainingSides.indexOf(el.user.side), 1);
+				});
+
 				// set the player side
-				player.user.side = this.sides[players.length];
+				player.user.side = remainingSides[0];
 
 				// add the player to the room
 				player.join(this.id);
@@ -122,7 +134,7 @@ game.prototype = {
 
 	start : function(){
 		var pace = {
-			value : 20,
+			value : 15,
 			randomAngle : Math.random() * 360 * 0.0174532925,
 			x : 0,
 			y : 0
