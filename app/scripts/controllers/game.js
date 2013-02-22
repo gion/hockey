@@ -1,8 +1,8 @@
 'use strict';
 
-angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", "$q", "$timeout", "socket" , "animationFrame", '$window', function($scope, $rootScope, $routeParams, $q, $timeout, socket, animationFrame, $window) {
+angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", "$q", "$timeout", "socket" , "animationFrame", function($scope, $rootScope, $routeParams, $q, $timeout, socket, animationFrame) {
 	// number of pixels that the "goalkeeper" can move at a time
-
+	window.animationFrame = animationFrame;
 	//window.X = 1;
 	var pace = 30,
 		touch  = {
@@ -237,8 +237,6 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 		}
 	})();
 
-
-
 	var ball = {
 		frameDuration : 30,
 		pace : {
@@ -280,11 +278,14 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 		//	ball.analyze();
 		},
 		move : function(){
-			//if(window.X)return;
+			if(window.X)
+				return;
 			ball.pause();
 
 			$scope.ballY += ball.pace.y;
 			$scope.ballX += ball.pace.x;
+
+			$scope.$apply();
 
 		//	$scope.ballPosition = 
 			ball.analyze();
@@ -293,6 +294,7 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 		analyze : function(){
 			var pos = ball.getCoords(),
 				gameOver = false;
+				console.log(ball.$el.width());
 
 			// if the ball exeedes the left boundery
 			if(pos.left <= ball.bounderies.left)
@@ -387,15 +389,15 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 		//	var deferred = $q.defer();
 			if(!gameOver)
 				{
-
-					ball.timeout = $window.start(ball.move());
-
+					ball.timeout = animationFrame.start(function(){
+						ball.move();	
+					});
 				}
 
 			else
 				{
 					io.emit('lost');
-					ball.pause();
+					ball.pause(true);
 
 	/*				// sample for now
 					io.trigger('gameOver', {
@@ -410,15 +412,21 @@ angularGameApp.controller('GameCtrl', ["$scope",  "$rootScope", "$routeParams", 
 		//	return deferred.propmise;
 		},
 		pause : function(force){
-			$window.stop(ball.timeout);
-			
-			if(force)
-				$window.stop(ball.timeout);
+			animationFrame.stop(ball.timeout);
+			/*setTimeout(function(){
+			animationFrame.stop(ball.timeout);
+			},0)*/
+			if(force){
+				setTimeout(function(){
+					animationFrame.stop(ball.timeout);
+				},0)
+				//animationFrame.stop(ball.timeout);
+			}
 		},
 		resume : function(){
 			ball.analyze();
 		}
-	};
+	}
 
 
 	$scope.ball = ball;

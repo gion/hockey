@@ -6,12 +6,10 @@ io.set('log level', '2');
 io.sockets.on('connection', function (socket) {
 	socket.user = {};
 	socket.emit('set:id', socket.id);
+	game.updateGames();
 
 	socket.on('change:name', function (name) {
 		socket.user.name = name;
-		try{
-			socket.game.updateGames();
-		}catch(e){}
 	});
 
 
@@ -77,12 +75,30 @@ var game = function(id){
 	this.id = id;
 	game.games[id] = this;
 	game.games.count++;
-	this.updateGames();
 }
 
 game.games = {
 	count : 0
 };
+
+game.updateGames = function(){
+	var games = [];
+	for(var id in game.games)
+		if(game.games.hasOwnProperty(id) && game.games[id] instanceof game){
+			var item = game.games[id],
+				players = item.getPlayers();
+			if(!players.length)
+				continue;
+			//console.log(players[0].user.name);
+			games.push({
+				token : id,
+				name : players[0].user.name ? players[0].user.name : 'no-name',
+				inplay : item.getPlayers().length >= this.maxPlayerCount
+			});
+		}
+	io.sockets.emit('change:games', games);
+}
+
 
 game.prototype = {
 
@@ -116,19 +132,19 @@ game.prototype = {
 				// "update" the player
 				player.emit('initPlayer', player.user);
 			}
-		this.updateGames();
-
+		game.updateGames();
 		return this;
 	},
 
 	remove : function(player){
 		player.leave(this.id);
+		game.updateGames();
 		return this;
 	},
 
 	start : function(){
 		var pace = {
-			value : 10,
+			value : 18,
 			randomAngle : Math.random() * 360 * 0.0174532925,
 			x : 0,
 			y : 0
@@ -140,7 +156,7 @@ game.prototype = {
 			x : values[absValues.indexOf(Math.max.apply(Math, absValues))] * pace.value,
 			y : values[absValues.indexOf(Math.min.apply(Math, absValues))] * pace.value
 		});
-		this.updateGames();
+		game.updateGames();
 	},
 
 	disconnect : function(){
@@ -148,7 +164,7 @@ game.prototype = {
 
 		delete game.games[this.id];
 		game.games.count--;
-		this.updateGames();
+		game.updateGames();
 	},
 
 	broadcast : function(event, data){
