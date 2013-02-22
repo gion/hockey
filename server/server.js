@@ -58,6 +58,7 @@ io.sockets.on('connection', function (socket) {
 		});
 
 		socket.on('lost', function(){
+			console.log(socket.user.name + ' has lost ('+ socket.user.side +')');
 			var winner = socket.user.side == 'left' ? 'right' : 'left',
 				score = [];
 			
@@ -67,8 +68,7 @@ io.sockets.on('connection', function (socket) {
 			});
 
 			socket.game.broadcast('gameOver', {
-			//	winner : winner,
-				foo : 'bar',
+				winner : winner,
 				score : score
 			});
 		});
@@ -161,6 +161,7 @@ game.prototype = {
 
 				// set the player side
 				player.user.side = remainingSides[0];
+				console.log(player.user.side);
 
 				// add the player to the room
 				player.join(this.id);
@@ -186,7 +187,7 @@ game.prototype = {
 
 	start : function(){
 		var pace = {
-			value : 5,
+			value : 10,
 			randomAngle : Math.random() * 360 * 0.0174532925,
 			x : 0,
 			y : 0
